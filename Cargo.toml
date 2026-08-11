@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/common",
+    "services/core-service",
+    "services/media-worker",
+]
+
+[workspace.package]
+edition = "2021"
+
+[profile.dev]
+debug = 0

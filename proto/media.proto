@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package media.v1;
+
+// Kept intentionally separate from the JSON structs used on Kafka
+// (crates/common::events) — this is the synchronous, browser-adjacent
+// wire contract (core-service <-> BFF), which is exactly where gRPC's
+// strong typing earns its keep. Kafka payloads stay JSON for readability
+// during development; see the plan doc for the reasoning.
+
+enum MediaKind {
+  MEDIA_KIND_UNSPECIFIED = 0;
+  MEDIA_KIND_IMAGE = 1;
+  MEDIA_KIND_VIDEO = 2;
+}
+
+enum MediaStatus {
+  MEDIA_STATUS_UNSPECIFIED = 0;
+  MEDIA_STATUS_UPLOADED = 1;
+  MEDIA_STATUS_PROCESSING = 2;
+  MEDIA_STATUS_PROCESSED = 3;
+  MEDIA_STATUS_FAILED = 4;
+}
+
+enum RenditionType {
+  RENDITION_TYPE_UNSPECIFIED = 0;
+  RENDITION_TYPE_THUMBNAIL = 1;
+  RENDITION_TYPE_CANDIDATE_FRAME = 2;
+  RENDITION_TYPE_PREVIEW_CLIP = 3;
+}
+
+message Rendition {
+  string id = 1;
+  RenditionType rendition_type = 2;
+  string path = 3;
+  uint32 width = 4;
+  uint32 height = 5;
+  optional double score = 6;
+  bool is_selected = 7;
+  optional double timestamp_seconds = 8;
+}
+
+message MediaAsset {
+  string id = 1;
+  string original_filename = 2;
+  string mime_type = 3;
+  MediaKind kind = 4;
+  MediaStatus status = 5;
+  string created_at = 6;
+  repeated Rendition renditions = 7;
+}
+
+message GetMediaAssetRequest {
+  string asset_id = 1;
+}
+
+message ListMediaRequest {
+  uint32 page_size = 1;
+  string page_token = 2;
+  optional MediaKind kind_filter = 3;
+  optional MediaStatus status_filter = 4;
+}
+
+message ListMediaResponse {
+  repeated MediaAsset assets = 1;
+  string next_page_token = 2;
+}
+
+message StreamMediaStatusRequest {
+  string asset_id = 1;
+}
+
+// Named distinctly from the `MediaStatus` enum above — proto3 requires
+// unique top-level symbol names within a package.
+message MediaStatusUpdate {
+  string asset_id = 1;
+  MediaStatus status = 2;
+  optional string message = 3;
+  int64 updated_at_ms = 4;
+  optional string progress_hint = 5;
+}
+
+service MediaService {
+  rpc GetMediaAsset(GetMediaAssetRequest) returns (MediaAsset);
+  rpc ListMedia(ListMediaRequest) returns (ListMediaResponse);
+  rpc StreamMediaStatus(StreamMediaStatusRequest) returns (stream MediaStatusUpdate);
+}

@@ -51,6 +51,12 @@ async fn main() -> anyhow::Result<()> {
         .set("group.id", KAFKA_CONSUMER_GROUP_MEDIA_WORKER)
         .set("enable.auto.commit", "true")
         .set("auto.offset.reset", "earliest")
+        // librdkafka's default 5-minute metadata refresh means a
+        // consumer that subscribes before a topic's first message is
+        // produced (its auto-create moment) can otherwise sit idle for
+        // up to 5 minutes before noticing the topic now exists — exactly
+        // the startup ordering this service hits every fresh compose up.
+        .set("topic.metadata.refresh.interval.ms", "5000")
         .create()
         .expect("failed to create Kafka consumer");
 

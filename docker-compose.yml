@@ -11,6 +11,13 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # Single-broker cluster: the internal __consumer_offsets topic
+      # (which backs ALL consumer-group coordination) defaults to
+      # replication factor 3 and can never be created with only one
+      # broker — every consumer subscribe silently never gets a
+      # partition assignment. This is the single most common single-node
+      # Kafka gotcha; without it nothing that uses a consumer group works.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     # Ephemeral on purpose — no volume. State of record lives in SQLite
     # and the media/ directory, not Kafka retention, so a fresh KRaft
     # cluster id on every `docker-compose up` is simpler than persisting

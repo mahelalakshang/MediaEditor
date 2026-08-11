@@ -31,6 +31,10 @@ pub async fn run(kafka_brokers: String, tx: broadcast::Sender<StatusEvent>) {
         .set("group.id", "core-service-status-watcher")
         .set("enable.auto.commit", "true")
         .set("auto.offset.reset", "latest")
+        // See media-worker/src/main.rs — same fix for the same reason:
+        // these topics don't exist until media-worker's first publish,
+        // which can happen well after this consumer subscribes.
+        .set("topic.metadata.refresh.interval.ms", "5000")
         .create()
         .expect("failed to create Kafka consumer for status watcher");
 

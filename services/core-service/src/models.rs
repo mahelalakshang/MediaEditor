@@ -4,6 +4,24 @@ use common::{MediaKind, MediaStatus, RenditionType};
 use serde::Serialize;
 use sqlx::FromRow;
 
+/// Single source of truth for the mime-type -> file-extension mapping,
+/// shared by the upload handler (validating + naming new files) and the
+/// DTO layer (deriving the original file's public download path).
+pub fn extension_for_mime(mime_type: &str) -> &'static str {
+    match mime_type {
+        "image/png" => "png",
+        "image/gif" => "gif",
+        "image/webp" => "webp",
+        "image/jpeg" => "jpg",
+        "video/mp4" => "mp4",
+        "video/webm" => "webm",
+        "video/quicktime" => "mov",
+        other if other.starts_with("image/") => "jpg",
+        other if other.starts_with("video/") => "mp4",
+        _ => "bin",
+    }
+}
+
 /// Raw row shapes as stored in SQLite (enums as TEXT columns).
 #[derive(Debug, FromRow)]
 pub struct MediaAssetRow {
@@ -73,10 +91,16 @@ pub struct MediaAssetDto {
     pub status: MediaStatus,
     pub created_at: String,
     pub renditions: Vec<RenditionDto>,
+    /// Portable relative path (e.g. "{id}/original.png") the frontend
+    /// resolves to a download URL via `/media/{original_path}` — see
+    /// media-worker's `public_rendition_path` for the same pattern
+    /// applied to renditions.
+    pub original_path: String,
 }
 
 impl MediaAssetDto {
     pub fn from_row(row: MediaAssetRow, renditions: Vec<MediaRenditionRow>) -> Self {
+        let original_path = format!("{}/original.{}", row.id, extension_for_mime(&row.mime_type));
         MediaAssetDto {
             id: row.id,
             original_filename: row.original_filename,
@@ -86,6 +110,7 @@ impl MediaAssetDto {
                 .expect("status column holds an invalid enum value"),
             created_at: row.created_at,
             renditions: renditions.into_iter().map(RenditionDto::from).collect(),
+            original_path,
         }
     }
 }

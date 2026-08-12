@@ -17,18 +17,14 @@ pub async fn health(State(state): State<Arc<AppState>>) -> Result<StatusCode, Ap
 }
 
 fn kind_and_extension_for_mime(mime_type: &str) -> Option<(MediaKind, &'static str)> {
-    match mime_type {
-        "image/png" => Some((MediaKind::Image, "png")),
-        "image/gif" => Some((MediaKind::Image, "gif")),
-        "image/webp" => Some((MediaKind::Image, "webp")),
-        "image/jpeg" => Some((MediaKind::Image, "jpg")),
-        "video/mp4" => Some((MediaKind::Video, "mp4")),
-        "video/webm" => Some((MediaKind::Video, "webm")),
-        "video/quicktime" => Some((MediaKind::Video, "mov")),
-        other if other.starts_with("image/") => Some((MediaKind::Image, "jpg")),
-        other if other.starts_with("video/") => Some((MediaKind::Video, "mp4")),
-        _ => None,
-    }
+    let kind = if mime_type.starts_with("image/") {
+        MediaKind::Image
+    } else if mime_type.starts_with("video/") {
+        MediaKind::Video
+    } else {
+        return None;
+    };
+    Some((kind, crate::models::extension_for_mime(mime_type)))
 }
 
 pub async fn upload(

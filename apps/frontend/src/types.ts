@@ -21,6 +21,7 @@ export interface MediaAsset {
   status: MediaStatus;
   createdAt: string;
   renditions: Rendition[];
+  originalPath: string;
 }
 
 export interface ListMediaResponse {

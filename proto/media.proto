@@ -48,6 +48,7 @@ message MediaAsset {
   MediaStatus status = 5;
   string created_at = 6;
   repeated Rendition renditions = 7;
+  string original_path = 8;
 }
 
 message GetMediaAssetRequest {

@@ -195,6 +195,25 @@ body {
   font-size: 1.25rem;
 }
 
+.download-link {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.8rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.download-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .status-message {
   color: var(--text-muted);
   font-size: 0.9rem;

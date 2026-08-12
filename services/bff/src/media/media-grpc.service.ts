@@ -22,6 +22,7 @@ export interface GrpcMediaAsset {
   status: string;
   createdAt: string;
   renditions: GrpcRendition[];
+  originalPath: string;
 }
 
 export interface GrpcListMediaResponse {

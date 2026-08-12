@@ -55,6 +55,13 @@ export function AssetDetail({ assetId, onBack }: { assetId: string; onBack: () =
       <div className="asset-detail-header">
         <h2>{asset.originalFilename}</h2>
         <StatusBadge status={status} />
+        <a
+          className="download-link"
+          href={mediaUrl(asset.originalPath)}
+          download={asset.originalFilename}
+        >
+          &darr; Download original
+        </a>
       </div>
       {liveStatus?.message && <p className="status-message">{liveStatus.message}</p>}
 

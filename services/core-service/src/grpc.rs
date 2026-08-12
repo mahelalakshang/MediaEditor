@@ -70,6 +70,11 @@ fn to_proto_asset(row: MediaAssetRow, renditions: Vec<MediaRenditionRow>) -> Pro
         .status
         .parse::<common::MediaStatus>()
         .expect("status column holds an invalid enum value");
+    let original_path = format!(
+        "{}/original.{}",
+        row.id,
+        crate::models::extension_for_mime(&row.mime_type)
+    );
     ProtoMediaAsset {
         id: row.id,
         original_filename: row.original_filename,
@@ -78,6 +83,7 @@ fn to_proto_asset(row: MediaAssetRow, renditions: Vec<MediaRenditionRow>) -> Pro
         status: proto_status(status),
         created_at: row.created_at,
         renditions: renditions.into_iter().map(to_proto_rendition).collect(),
+        original_path,
     }
 }
 

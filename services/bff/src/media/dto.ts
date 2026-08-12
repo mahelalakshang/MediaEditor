@@ -27,6 +27,7 @@ export function toAssetDto(a: GrpcMediaAsset) {
     status: stripEnumPrefix(a.status, 'MEDIA_STATUS_'),
     createdAt: a.createdAt,
     renditions: (a.renditions ?? []).map(toRenditionDto),
+    originalPath: a.originalPath,
   };
 }
 

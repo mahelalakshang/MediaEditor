@@ -195,8 +195,13 @@ body {
   font-size: 1.25rem;
 }
 
-.download-link {
+.download-actions {
   margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.download-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
